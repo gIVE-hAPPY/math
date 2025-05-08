@@ -2,15 +2,15 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>초1 덧셈 문제 채점</title>
+  <title>초등 1학년 덧셈 문제 - 합이 9 이하</title>
   <style>
     @page {
       size: A4;
-      margin: 3cm;
+      margin: 2.5cm;
     }
     body {
       font-family: 'Arial', sans-serif;
-      font-size: 30px;
+      font-size: 24px;
       margin: 0;
       padding: 0;
       text-align: center;
@@ -21,24 +21,31 @@
     }
     p.instruction {
       text-align: center;
-      font-size: 30px;
+      font-size: 24px;
       margin-bottom: 30px;
     }
     form {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 0 20px;
     }
     .problem {
-      width: 50%;
       box-sizing: border-box;
       padding: 10px;
+      text-align: left;
+      font-size: 30px;
     }
-    .problem label {
-      display: block;
+    .problem .label {
+      font-size: 20px;
       margin-bottom: 5px;
     }
+    .problem .question {
+      padding-left: 1cm;
+      font-size: 30px;
+    }
     .problem input[type="number"] {
-      width: 100px;
+      width: 60px;
       font-size: 30px;
       padding: 4px;
       background-color: lightgreen;
@@ -47,25 +54,22 @@
     .problem input.filled {
       background-color: transparent;
     }
-    #result {
-      text-align: center;
-      font-size: 30px;
-      margin-top: 20px;
-      font-weight: bold;
-    }
     .submit-container,
     .retry-container {
       width: 100%;
       text-align: center;
       margin-top: 20px;
     }
+    #score-display {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
     button {
-      font-size: 30px;
+      font-size: 24px;
       padding: 8px 16px;
       margin: 5px;
     }
-
-    /* 하트 모양 */
     .heart-container {
       position: relative;
       display: inline-block;
@@ -75,7 +79,6 @@
       clip-path: polygon(50% 0%, 0% 35%, 50% 100%, 100% 35%);
       margin-top: 20px;
     }
-
     .speech-bubble {
       position: absolute;
       top: -20px;
@@ -88,7 +91,6 @@
       width: 160px;
       text-align: center;
     }
-
     .speech-bubble::after {
       content: '';
       position: absolute;
@@ -99,29 +101,26 @@
       border-style: solid;
       border-color: #fff transparent transparent transparent;
     }
-
   </style>
 </head>
 <body>
 
-  <h1>초등 1학년 덧셈 문제</h1>
-  <p class="instruction">다음 덧셈을 하세요.</p>
+  <h1>덧셈 문제</h1>
+  <p class="instruction">두 수를 더하여보세요.</p>
+
+  <div id="score-display"></div>
 
   <form id="quizForm" onsubmit="gradeQuiz(event)">
-    <!-- 문제 리스트 -->
     <div class="submit-container">
       <button type="submit">채점하기</button>
     </div>
   </form>
-
-  <div id="result"></div>
 
   <div class="retry-container" style="display: none;">
     <button onclick="retrySameProblems()">다시 풀기</button>
     <button onclick="generateNewProblems()">새로운 문제 풀기</button>
   </div>
 
-  <!-- 하트 모양과 메시지 -->
   <div id="heartMessageContainer" style="display: none;">
     <div class="heart-container">
       <div id="speechBubble" class="speech-bubble"></div>
@@ -131,41 +130,37 @@
   <script>
     let problems = [];
 
-    // 무작위 덧셈 문제 생성기
-    function generateRandomProblems(count = 10) {
+    function generateRandomProblems(count = 20) {
       const list = [];
-      for (let i = 0; i < count; i++) {
-        const a = Math.floor(Math.random() * 10);
-        const b = Math.floor(Math.random() * 10);
-        list.push([a, b]);
+      while (list.length < count) {
+        const a = Math.floor(Math.random() * 9) + 1;
+        const b = Math.floor(Math.random() * 9) + 1;
+        if (a + b <= 9) {
+          list.push([a, b]);
+        }
       }
       return list;
     }
 
-    // 문제 폼 초기화 및 생성
-    function renderProblems(problemSet) {
+    function renderProblems(problemSet, feedback = []) {
       const form = document.getElementById('quizForm');
       const submitContainer = form.querySelector('.submit-container');
-
-      // 이전 문제 제거
       [...form.querySelectorAll('.problem')].forEach(el => el.remove());
-      document.getElementById('result').innerHTML = '';
       document.querySelector('.retry-container').style.display = 'none';
       document.getElementById('heartMessageContainer').style.display = 'none';
+      document.getElementById('score-display').innerText = '';
 
       problemSet.forEach((p, i) => {
         const div = document.createElement('div');
         div.className = 'problem';
+        const answer = feedback[i] !== undefined ? `<span style='color:${feedback[i] ? "green" : "red"}; font-size:30px;'>(${feedback[i] ? p[0] + p[1] : "?"})</span>` : '';
         div.innerHTML = `
-          <label for="q${i}">
-            [문제 ${i + 1}] ${p[0]} + ${p[1]} = 
-            <input type="number" id="q${i}" name="q${i}" required>
-          </label>
+          <div class="label">(문제 ${i + 1})</div>
+          <div class="question">${p[0]} + ${p[1]} = <input type="number" id="q${i}" name="q${i}" required> ${answer}</div>
         `;
         form.insertBefore(div, submitContainer);
       });
 
-      // 입력 이벤트 연결
       problemSet.forEach((_, i) => {
         const input = document.getElementById(`q${i}`);
         input.addEventListener("input", function () {
@@ -182,32 +177,24 @@
       });
     }
 
-    // 채점 함수
     function gradeQuiz(event) {
       event.preventDefault();
       let correct = 0;
-      let wrongList = [];
+      let feedback = [];
 
       problems.forEach((p, i) => {
         const answer = p[0] + p[1];
         const userAnswer = parseInt(document.getElementById(`q${i}`).value, 10);
-        if (userAnswer === answer) {
-          correct++;
-        } else {
-          wrongList.push(`[문제 ${i + 1}] (${p[0]} + ${p[1]} = ${answer})`);
-        }
+        const isCorrect = userAnswer === answer;
+        if (isCorrect) correct++;
+        feedback.push(isCorrect);
       });
 
-      let resultText = `총 ${problems.length}문제 중 ${correct}개 정답!`;
-      if (wrongList.length > 0) {
-        resultText += `<br><br>틀린 문제:<br>` + wrongList.join('<br>');
-      }
-      document.getElementById('result').innerHTML = resultText;
+      document.getElementById('score-display').innerText = `총 ${problems.length}문제 중 ${correct}개 정답!`;
 
-      // 90% 이상 맞추었을 때 메시지
       const heartMessageContainer = document.getElementById('heartMessageContainer');
       const speechBubble = document.getElementById('speechBubble');
-      
+
       if (correct / problems.length >= 0.9) {
         heartMessageContainer.style.display = 'block';
         speechBubble.innerHTML = '훌륭해요!';
@@ -216,21 +203,19 @@
         speechBubble.innerHTML = '노력하요';
       }
 
+      renderProblems(problems, feedback);
       document.querySelector('.retry-container').style.display = 'block';
     }
 
-    // 다시 풀기 (같은 문제)
     function retrySameProblems() {
       renderProblems(problems);
     }
 
-    // 새로운 문제로 풀기
     function generateNewProblems() {
       problems = generateRandomProblems();
       renderProblems(problems);
     }
 
-    // 시작 시 실행
     problems = generateRandomProblems();
     renderProblems(problems);
   </script>
