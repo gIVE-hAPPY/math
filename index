@@ -10,8 +10,8 @@
   
   <!-- 링크 추가 -->
   <ul>
-    <li><a href="add_easy.html">쉬운 덧셈 문제</a></li>
-    <li><a href="subtract_easy.html">쉬운 뺄셈 문제</a></li>
+    <li><a href="add easy.html">쉬운 덧셈 문제</a></li>
+    <li><a href="sub easy.html">쉬운 뺄셈 문제</a></li>
   </ul>
 </body>
 </html>
