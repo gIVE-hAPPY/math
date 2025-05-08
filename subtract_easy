@@ -220,6 +220,6 @@
     problems = generateRandomProblems();
     renderProblems(problems);
   </script>
-
+<a href="index.html">홈으로 돌아가기</a>
 </body>
 </html>
